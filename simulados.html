@@ -1,0 +1,749 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Simulados IFRN</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap');
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #f0f4f8;
+            color: #334155;
+            padding-bottom: 6rem; /* Space for the footer */
+        }
+        .container {
+            max-width: 960px;
+        }
+        .nav-button {
+            transition: all 0.2s ease-in-out;
+        }
+        .nav-button:hover {
+            transform: translateY(-2px);
+        }
+        .nav-button.active {
+            background-color: #6366f1;
+            color: white;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        }
+        .card {
+            box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+        }
+        .option-item {
+            cursor: pointer;
+            transition: all 0.2s ease-in-out;
+        }
+        .option-item:hover {
+            background-color: #f1f5f9;
+        }
+        .option-item.correct {
+            background-color: #d1fae5;
+        }
+        .option-item.incorrect {
+            background-color: #fee2e2;
+        }
+    </style>
+</head>
+<body class="antialiased">
+
+    <header class="bg-indigo-600 shadow-lg fixed top-0 left-0 w-full z-10">
+        <div class="container mx-auto px-4 py-4 flex flex-col sm:flex-row items-center justify-between">
+            <h1 class="text-3xl font-bold text-white mb-2 sm:mb-0">Simulados IFRN</h1>
+            <nav id="nav-container" class="flex flex-wrap justify-center sm:justify-end gap-2">
+                <!-- Navigation buttons will be injected here by JS -->
+            </nav>
+        </div>
+    </header>
+
+    <main class="container mx-auto mt-28 px-4 py-8">
+        <div id="subject-info" class="bg-white p-6 rounded-lg card mb-8 text-center hidden">
+            <h2 id="subject-title" class="text-2xl font-semibold text-indigo-600"></h2>
+            <p id="subject-count" class="text-gray-500 mt-2"></p>
+        </div>
+        
+        <div id="questions-container" class="space-y-6">
+            <!-- Questions will be injected here by JS -->
+        </div>
+        
+        <div id="feedback-message" class="fixed bottom-0 left-0 w-full p-4 text-center text-white text-xl font-bold transform transition-transform duration-300 -translate-y-full">
+            <!-- Feedback messages will be shown here -->
+        </div>
+    </main>
+    
+    <script>
+        // Data for all simulated exams
+        const simulados = {
+            'dia1': {
+                title: 'Interpretação de Texto',
+                questions: [
+                    {
+                        text: 'Segundo o texto, a leitura pode ser entendida como:',
+                        options: ['Apenas a identificação de palavras no papel.', 'Um ato mecânico de pronunciar frases.', 'Uma prática de construir sentidos com base em experiências.', 'A simples memorização de símbolos.', 'A atividade de ler em voz alta.'],
+                        answer: 'c'
+                    },
+                    {
+                        text: 'O texto destaca que:',
+                        options: ['A tecnologia eliminou as dificuldades de comunicação.', 'O uso da tecnologia sempre garante informações corretas.', 'A comunicação atual exige cuidado com a verificação de informações.', 'A tecnologia substituiu totalmente a leitura.', 'Compartilhar informações é sempre seguro.'],
+                        answer: 'c'
+                    },
+                    {
+                        text: 'De acordo com o texto, o esporte contribui para:',
+                        options: ['A formação apenas física dos indivíduos.', 'A construção de valores sociais e pessoais.', 'A competição sem limites.', 'O abandono das regras.', 'A eliminação do trabalho em grupo.'],
+                        answer: 'b'
+                    },
+                    {
+                        text: 'A principal finalidade da literatura infantil é:',
+                        options: ['Exigir que as crianças leiam grandes volumes de livros.', 'Proporcionar prazer e aprendizado.', 'Substituir os jogos eletrônicos.', 'Incentivar a leitura em voz alta.', 'Impedir o acesso a outros meios de comunicação.'],
+                        answer: 'b'
+                    },
+                    {
+                        text: 'A mensagem central da frase é:',
+                        options: ['O lixo só deve ser descartado em locais apropriados.', 'Pequenas atitudes diárias podem fazer diferença.', 'A reciclagem é uma responsabilidade do governo.', 'Não é preciso se preocupar com o meio ambiente.', 'A poluição é um problema sem solução.'],
+                        answer: 'b'
+                    },
+                    {
+                        text: 'A poesia, segundo o texto:',
+                        options: ['Não tem relação com a realidade.', 'É uma forma de comunicação estritamente formal.', 'Transmite emoções e reflexões sociais.', 'Serve apenas para decorar a fala.', 'É um gênero textual em desuso.'],
+                        answer: 'c'
+                    },
+                    {
+                        text: 'Segundo o texto, o voluntariado contribui para:',
+                        options: ['O isolamento social.', 'O desenvolvimento da empatia.', 'A indiferença diante das diferenças.', 'A competição entre os voluntários.', 'O afastamento das comunidades.'],
+                        answer: 'b'
+                    },
+                    {
+                        text: 'O texto afirma que a música:',
+                        options: ['Sempre deixa as pessoas tristes.', 'É incapaz de influenciar emoções.', 'Proporciona bem-estar e alívio de tensões.', 'Só pode ser usada como passatempo.', 'Deve ser evitada em momentos de estresse.'],
+                        answer: 'c'
+                    },
+                    {
+                        text: 'O texto destaca a importância de:',
+                        options: ['Aceitar todas as informações sem questionar.', 'Evitar o acesso a notícias.', 'Ler criticamente para combater fake news.', 'Compartilhar notícias sem verificar.', 'Substituir jornais por redes sociais.'],
+                        answer: 'c'
+                    },
+                    {
+                        text: 'O texto sugere que o uso responsável da internet significa:',
+                        options: ['Passar o máximo de tempo possível conectado.', 'Ignorar conteúdos educativos.', 'Dosar o tempo e escolher conteúdos úteis.', 'Usar apenas redes sociais para entretenimento.', 'Acessar apenas conteúdos que não exigem reflexão.'],
+                        answer: 'c'
+                    }
+                ]
+            },
+            'dia2': {
+                title: 'Matemática',
+                questions: [
+                    {
+                        text: 'Um produto sofreu dois aumentos sucessivos de 20% e 30%. Qual foi o aumento percentual total em relação ao preço inicial?',
+                        options: ['50%', '56%', '60%', '66%', '70%'],
+                        answer: 'b'
+                    },
+                    {
+                        text: 'Em uma eleição, 40% dos eleitores votaram em A, 35% em B e o restante em branco. Se 720 eleitores votaram em branco, qual foi o total de eleitores?',
+                        options: ['4000', '4500', '4800', '5000', '5200'],
+                        answer: 'c'
+                    },
+                    {
+                        text: 'Uma mercadoria teve desconto de 20% e depois outro de 15% sobre o valor já reduzido. Qual o desconto total em relação ao preço original?',
+                        options: ['32%', '33%', '34%', '35%', '36%'],
+                        answer: 'b'
+                    },
+                    {
+                        text: 'Em uma fábrica, 60% dos funcionários são homens. Dentre os homens, 25% trabalham no setor A. Qual a porcentagem do total de funcionários que são homens do setor A?',
+                        options: ['10%', '12,5%', '13%', '15%', '20%'],
+                        answer: 'd'
+                    },
+                    {
+                        text: 'Um investimento rendeu 25% no primeiro mês e perdeu 20% no segundo mês. Qual foi a variação percentual total em relação ao valor inicial?',
+                        options: ['0%', '2%', '4%', '5%', '10%'],
+                        answer: 'a'
+                    },
+                    {
+                        text: 'Em uma pesquisa, 40% dos entrevistados preferem o produto A. Se o número de pessoas que não preferem o produto A é 120, qual é o total de entrevistados?',
+                        options: ['70', '75', '80', '85', '90'],
+                        answer: 'c'
+                    },
+                    {
+                        text: 'Uma loja oferece 30% de desconto em um produto. Se o preço original é R$ 1200,00, qual será o preço final com o desconto?',
+                        options: ['780', '840', '900', '960', '1020'],
+                        answer: 'b'
+                    },
+                    {
+                        text: 'Um produto custa R$ 1000,00. Qual será o preço se ele sofrer um aumento de 20% e, em seguida, um desconto de 20%?',
+                        options: ['960', '1000', '1040', '1080', '1120'],
+                        answer: 'a'
+                    },
+                    {
+                        text: 'Um produto custava R$ 200,00. Sofreu um aumento de x% e depois um desconto do mesmo valor percentual x. O preço final foi R$ 196,00. Qual foi o valor de x?',
+                        options: ['5%', '10%', '15%', '20%', '25%'],
+                        answer: 'b'
+                    },
+                    {
+                        text: 'Em uma turma, 40% dos alunos são meninas. Se o número de meninos é 18 a mais que o de meninas, qual é o total de alunos da turma?',
+                        options: ['40', '45', '50', '55', '60'],
+                        answer: 'e'
+                    },
+                    {
+                        text: 'Um capital de R$ 2000,00 foi dividido em duas partes proporcionais a 3:7. Qual foi o valor da maior parte?',
+                        options: ['1200', '1300', '1400', '1500', '1600'],
+                        answer: 'c'
+                    },
+                    {
+                        text: 'Em uma escola, a razão entre alunos que praticam futebol e os que praticam vôlei é 9:11. Se há 100 alunos praticando vôlei, quantos praticam futebol?',
+                        options: ['80', '81,8', '82', '85', '90'],
+                        answer: 'e'
+                    },
+                    {
+                        text: 'Um capital de R$ 2000,00 foi aplicado a juros simples de 5% ao ano. Qual o montante após 3 anos?',
+                        options: ['2100', '2300', '2350', '2400', '2500'],
+                        answer: 'b'
+                    },
+                    {
+                        text: 'Um produto teve seu preço reduzido em 10% para R$ 22500. Qual era o preço original?',
+                        options: ['25000', '27000', '28000', '30000', '22500'],
+                        answer: 'a'
+                    },
+                    {
+                        text: 'Um capital de R$ 50000,00 foi aplicado a juros compostos de 10% ao ano. Qual o montante após 2 anos?',
+                        options: ['55000', '60500', '61000', '62000', '65000'],
+                        answer: 'b'
+                    }
+                ]
+            },
+            'dia3': {
+                title: 'Gramática',
+                questions: [
+                    {
+                        text: 'Na frase "O silêncio da noite trouxe tranquilidade ao viajante", as palavras silêncio e tranquilidade são classificadas como:',
+                        options: ['Verbos', 'Substantivos', 'Adjetivos', 'Advérbios', 'Pronomes'],
+                        answer: 'b'
+                    },
+                    {
+                        text: 'Assinale a alternativa em que há somente adjetivos:',
+                        options: ['rápido, feliz, azul', 'correr, sorrir, brincar', 'intensamente, agora, aqui', 'mesa, livro, casa', 'eu, tu, nós'],
+                        answer: 'a'
+                    },
+                    {
+                        text: 'Na frase "Ela falou calmamente durante a reunião", a palavra calmamente classifica-se como:',
+                        options: ['Substantivo', 'Adjetivo', 'Advérbio', 'Verbo', 'Pronome'],
+                        answer: 'c'
+                    },
+                    {
+                        text: 'Qual das alternativas apresenta apenas substantivos concretos?',
+                        options: ['casa, livro, alegria', 'esperança, tristeza, justiça', 'computador, cadeira, montanha', 'coragem, beleza, fé', 'amizade, saudade, amor'],
+                        answer: 'c'
+                    },
+                    {
+                        text: 'Na frase "Os meninos estudaram bastante para a prova", as palavras estudaram e bastante são, respectivamente:',
+                        options: ['Substantivo e advérbio', 'Verbo e advérbio', 'Verbo e adjetivo', 'Advérbio e substantivo', 'Adjetivo e advérbio'],
+                        answer: 'b'
+                    },
+                    {
+                        text: 'Assinale a alternativa em que a palavra destacada é um adjetivo:',
+                        options: ['O livro está **velho**.', 'Eles chegaram **cedo**.', 'Ele trabalha **muito**.', 'Correr é **bom**.', 'Gostaria de ir **lá**.'],
+                        answer: 'a'
+                    },
+                    {
+                        text: 'Na frase "O garoto **alto** correu **rapidamente**", a classificação das palavras destacadas (alto e rapidamente) é:',
+                        options: ['Substantivo e adjetivo', 'Adjetivo e advérbio', 'Advérbio e adjetivo', 'Verbo e substantivo', 'Substantivo e advérbio'],
+                        answer: 'b'
+                    },
+                    {
+                        text: 'Assinale a alternativa em que a palavra destacada é um verbo:',
+                        options: ['O amor é importante.', 'O carro é azul.', 'Eles **viajaram** ontem.', 'Estava muito triste.', 'Ele fala claramente.'],
+                        answer: 'c'
+                    },
+                    {
+                        text: 'Na frase "A criança **feliz** brincava no parque", a palavra feliz classifica-se como:',
+                        options: ['Substantivo', 'Adjetivo', 'Advérbio', 'Verbo', 'Conjunção'],
+                        answer: 'b'
+                    },
+                    {
+                        text: 'Assinale a alternativa em que há somente advérbios:',
+                        options: ['aqui, ontem, sempre', 'mesa, feliz, bonito', 'comer, beber, dormir', 'eu, você, eles', 'com, para, de'],
+                        answer: 'a'
+                    }
+                ]
+            },
+            'dia4': {
+                title: 'Geometria Plana',
+                questions: [
+                    {
+                        text: 'Um quadrado tem lado de 12 cm. Qual é sua área?',
+                        options: ['124 cm²', '144 cm²', '156 cm²', '168 cm²', '172 cm²'],
+                        answer: 'b'
+                    },
+                    {
+                        text: 'O perímetro de um retângulo é 48 cm. Sabendo que o comprimento é 14 cm, qual é a largura?',
+                        options: ['8 cm', '9 cm', '10 cm', '12 cm', '14 cm'],
+                        answer: 'c'
+                    },
+                    {
+                        text: 'Calcule a área de um triângulo de base 18 cm e altura 12 cm.',
+                        options: ['96 cm²', '108 cm²', '120 cm²', '216 cm²', '324 cm²'],
+                        answer: 'b'
+                    },
+                    {
+                        text: 'Um círculo possui raio de 7 cm. Qual é a sua área? (use $\\Pi = 3,14$)',
+                        options: ['150 cm²', '153,86 cm²', '154 cm²', '156 cm²', '160 cm²'],
+                        answer: 'b'
+                    },
+                    {
+                        text: 'O lado de um quadrado mede 20 cm. Qual é o seu perímetro?',
+                        options: ['60 cm', '70 cm', '80 cm', '90 cm', '100 cm'],
+                        answer: 'c'
+                    },
+                    {
+                        text: 'O perímetro de um triângulo equilátero é 45 cm. Qual é a medida do lado?',
+                        options: ['12 cm', '13 cm', '14 cm', '15 cm', '16 cm'],
+                        answer: 'd'
+                    },
+                    {
+                        text: 'A área de um retângulo é 70 cm². Sabendo que a largura é 7 cm, qual é o comprimento?',
+                        options: ['8 cm', '9 cm', '10 cm', '11 cm', '12 cm'],
+                        answer: 'c'
+                    },
+                    {
+                        text: 'O perímetro de um pentágono regular é 150 cm. Qual a medida do lado?',
+                        options: ['20 cm', '25 cm', '30 cm', '35 cm', '40 cm'],
+                        answer: 'c'
+                    },
+                    {
+                        text: 'A área de um quadrado é 25 cm². Qual a medida do lado?',
+                        options: ['4 cm', '5 cm', '6 cm', '7 cm', '8 cm'],
+                        answer: 'b'
+                    },
+                    {
+                        text: 'O perímetro de um quadrado é 40 cm. Qual a medida do lado?',
+                        options: ['8 cm', '10 cm', '12 cm', '14 cm', '16 cm'],
+                        answer: 'b'
+                    }
+                ]
+            },
+            'dia5': {
+                title: 'Sintaxe',
+                questions: [
+                    {
+                        text: 'Assinale a frase em que a vírgula está empregada corretamente:',
+                        options: ['O aluno chegou atrasado, porque perdeu o ônibus.', 'O aluno, chegou atrasado porque perdeu o ônibus.', 'O aluno chegou, atrasado porque perdeu o ônibus.', 'O aluno chegou atrasado porque, perdeu o ônibus.', 'O aluno chegou atrasado porque perdeu, o ônibus.'],
+                        answer: 'a'
+                    },
+                    {
+                        text: 'Assinale a alternativa em que o uso do ponto e vírgula (;) está correto:',
+                        options: ['Comprei pão; e leite para o café da manhã.', 'Estudou muito; mas não conseguiu a aprovação.', 'Estava cansado; entretanto continuou trabalhando.', 'Ele correu; e caiu no chão.', 'Gosto de viajar; porém não tenho tempo.'],
+                        answer: 'c'
+                    },
+                    {
+                        text: 'Assinale a frase em que há erro de concordância verbal:',
+                        options: ['As crianças brincavam na rua.', 'Os professores explicou a matéria.', 'Eles estudaram bastante.', 'Os alunos fizeram silêncio.', 'Nós fomos à biblioteca.'],
+                        answer: 'b'
+                    },
+                    {
+                        text: 'Assinale a frase em que a concordância nominal está correta:',
+                        options: ['As menina bonita chegaram cedo.', 'As meninas bonitos chegaram cedo.', 'As meninas bonitas chegou cedo.', 'As meninas bonitas chegaram cedo.', 'As menina bonitos chegaram cedo.'],
+                        answer: 'd'
+                    },
+                    {
+                        text: 'Indique a alternativa em que a vírgula foi usada para separar um vocativo:',
+                        options: ['A vida, que é breve, deve ser vivida.', 'Vamos, crianças, estudar agora.', 'Ele, apesar de doente, foi ao trabalho.', 'Os alunos, ansiosos, aguardavam o resultado.', 'A cidade, à noite, é muito bonita.'],
+                        answer: 'b'
+                    },
+                    {
+                        text: 'Assinale a alternativa em que a concordância verbal está incorreta:',
+                        options: ['Havia muitos livros na estante.', 'Fazem dois anos que ele viajou.', 'Existem pessoas na sala.', 'Compareceram os alunos e os professores.', 'Correram pelas ruas os meninos.'],
+                        answer: 'b'
+                    },
+                    {
+                        text: 'Em qual alternativa o uso da vírgula indica oração subordinada adverbial deslocada?',
+                        options: ['Ontem, fomos à praia.', 'João, meu vizinho, comprou um carro.', 'A prova, segundo os alunos, estava difícil.', 'O professor explicou, pacientemente, a questão.', 'A casa, que fica longe, foi vendida.'],
+                        answer: 'a'
+                    },
+                    {
+                        text: 'Assinale a alternativa em que o ponto e vírgula foi usado para separar itens de uma enumeração complexa:',
+                        options: ['No almoço havia arroz; feijão; salada; e carne.', 'O Brasil é grande; a Argentina também; o Uruguai, pequeno.', 'Corri; e depois descansei.', 'A menina leu; mas não entendeu.', 'Estudo sempre; porém esqueço rápido.'],
+                        answer: 'b'
+                    },
+                    {
+                        text: 'Em qual das frases há erro de concordância nominal?',
+                        options: ['Estavam todos contentes com a notícia.', 'A aluna ficou meio nervosa durante a apresentação.', 'Os meninos estavam bastante cansados.', 'Aquelas mulher estavam felizes.', 'As provas estavam fáceis.'],
+                        answer: 'd'
+                    },
+                    {
+                        text: 'Assinale a frase em que a vírgula foi usada para marcar uma oração explicativa:',
+                        options: ['Pedro, que estuda muito, passou no concurso.', 'Aquele menino, meu amigo, é muito inteligente.', 'Vi o filme, a peça, e o show.', 'Estudei, e passei na prova.', 'Não, não quero ir.'],
+                        answer: 'a'
+                    }
+                ]
+            },
+            'dia6': {
+                title: 'Álgebra',
+                questions: [
+                    {
+                        text: 'Resolva a equação: $3x+7=25$',
+                        options: ['4', '6', '7', '8', '5'],
+                        answer: 'b'
+                    },
+                    {
+                        text: 'A soma de um número com o dobro dele é 36. Qual é o número?',
+                        options: ['10', '11', '12', '14', '16'],
+                        answer: 'c'
+                    },
+                    {
+                        text: 'Resolva a equação: $2x-5=9$',
+                        options: ['6', '7', '8', '9', '10'],
+                        answer: 'b'
+                    },
+                    {
+                        text: 'Se a metade de um número acrescida de 8 é igual a 20, qual é o número?',
+                        options: ['20', '22', '24', '26', '28'],
+                        answer: 'c'
+                    },
+                    {
+                        text: 'Resolva a equação quadrática: $x^2-7x+12=0$',
+                        options: ['$x=2$ ou 5', '$x=3$ ou 4', '$x=6$ ou 2', '$x=1$ ou 12', 'Nenhuma das anteriores'],
+                        answer: 'b'
+                    },
+                    {
+                        text: 'O triplo de um número, diminuído de 4, é igual a 20. Qual é o número?',
+                        options: ['6', '7', '8', '9', '10'],
+                        answer: 'c'
+                    },
+                    {
+                        text: 'Resolva: $x^2-9=0$',
+                        options: ['$x=\\pm2$', '$x=\\pm3$', '$x=\\pm4$', '$x=\\pm5$', 'Nenhuma das anteriores'],
+                        answer: 'b'
+                    },
+                    {
+                        text: 'O quadrado de um número menos 5 vezes esse número é igual a 14. Qual é o número?',
+                        options: ['2 ou 7', '3 ou 6', '4 ou 5', '7 ou -2', 'Nenhuma das anteriores'],
+                        answer: 'd'
+                    },
+                    {
+                        text: 'A idade de um pai é o triplo da idade do filho. Daqui a 10 anos, a soma das idades será 100. Qual a idade do filho hoje?',
+                        options: ['10', '15', '20', '25', '30'],
+                        answer: 'b'
+                    },
+                    {
+                        text: 'Resolva: $5x+2=3x+14$',
+                        options: ['5', '6', '7', '8', '9'],
+                        answer: 'b'
+                    },
+                    {
+                        text: 'Se $x^2+x-20=0$, então as raízes são:',
+                        options: ['$x=4$ ou -5', '$x=5$ ou -4', '$x=-4$ ou 5', '$x=-5$ ou 4', 'Nenhuma das anteriores'],
+                        answer: 'a'
+                    },
+                    {
+                        text: 'A soma de um número e seu quíntuplo é 18. Qual é o número?',
+                        options: ['2', '3', '4', '5', 'Nenhuma das anteriores'],
+                        answer: 'b'
+                    },
+                    {
+                        text: 'A idade de Ana daqui a 5 anos será o triplo de sua idade atual. Qual é a idade de Ana hoje?',
+                        options: ['$x=-5$ ou 3', '2.5', '3.5', '5', 'Nenhuma das anteriores'],
+                        answer: 'a'
+                    },
+                    {
+                        text: 'Se a soma de dois números é 20 e a diferença é 4, quais são os números?',
+                        options: ['12 e 8', '14 e 6', '13 e 7', '10 e 10', 'Nenhuma das anteriores'],
+                        answer: 'a'
+                    },
+                    {
+                        text: 'A soma de dois números consecutivos é 11. Qual é o menor número?',
+                        options: ['5', '6', '4', '7', '8'],
+                        answer: 'a'
+                    }
+                ]
+            },
+            'dia8': {
+                title: 'Semântica',
+                questions: [
+                    {
+                        text: 'Assinale a alternativa em que as palavras são sinônimas:',
+                        options: ['alegre - triste', 'rápido - veloz', 'alto - baixo', 'quente - frio', 'forte - fraco'],
+                        answer: 'b'
+                    },
+                    {
+                        text: 'Assinale a alternativa em que as palavras são antônimas:',
+                        options: ['bonito - belo', 'pequeno - miúdo', 'fácil - difícil', 'claro - luminoso', 'iniciar - começar'],
+                        answer: 'c'
+                    },
+                    {
+                        text: 'A frase "O banco estava cheio" é ambigua porque a palavra banco pode significar:',
+                        options: ['uma instituição financeira ou um assento', 'apenas uma instituição financeira', 'apenas um assento', 'uma árvore ou uma flor', 'nada, não há ambiguidade'],
+                        answer: 'a'
+                    },
+                    {
+                        text: 'Na frase "Maria subiu a serra depressa", a palavra depressa é sinônimo de:',
+                        options: ['devagar', 'lentamente', 'rapidamente', 'vagarosamente', 'calmamente'],
+                        answer: 'c'
+                    },
+                    {
+                        text: 'O antônimo de feliz é:',
+                        options: ['contente', 'alegre', 'satisfeito', 'triste', 'animado'],
+                        answer: 'd'
+                    },
+                    {
+                        text: 'Na frase "Ele contou uma história fantástica", a palavra fantástica pode causar ambiguidade, pois pode significar:',
+                        options: ['incrível ou imaginária', 'triste ou alegre', 'clara ou escura', 'antiga ou nova', 'grande ou pequena'],
+                        answer: 'a'
+                    },
+                    {
+                        text: 'Assinale a alternativa em que as palavras não são sinônimas:',
+                        options: ['comprar - adquirir', 'iniciar - começar', 'terminar - concluir', 'correr - caminhar', 'lembrar - recordar'],
+                        answer: 'd'
+                    },
+                    {
+                        text: 'Na frase "João viu Pedro com o telescópio", há ambiguidade porque:',
+                        options: ['não se sabe se João usava o telescópio ou se Pedro estava com ele', 'a palavra telescópio tem dois sentidos', 'Pedro não existe na frase', 'João não aparece na frase', 'não há ambiguidade'],
+                        answer: 'a'
+                    },
+                    {
+                        text: 'O antônimo de rico é:',
+                        options: ['pobre', 'milionário', 'abastado', 'próspero', 'afortunado'],
+                        answer: 'a'
+                    },
+                    {
+                        text: 'A palavra "manga" é ambígua porque pode significar:',
+                        options: ['um objeto ou uma parte de uma roupa', 'apenas uma fruta', 'apenas uma parte de uma roupa', 'uma parte da perna ou uma parte do braço', 'nada, não há ambiguidade'],
+                        answer: 'a'
+                    }
+                ]
+            },
+            'dia9': {
+                title: 'Geometria Espacial',
+                questions: [
+                    {
+                        text: 'O volume de um cubo de aresta 6 cm é:',
+                        options: ['216 cm³', '126 cm³', '36 cm³', '512 cm³', '64 cm³'],
+                        answer: 'a'
+                    },
+                    {
+                        text: 'Um paralelepipedo tem dimensões 5 cm, 8 cm e 10 cm. Seu volume é:',
+                        options: ['400 cm³', '200 cm³', '50 cm³', '800 cm³', '500 cm³'],
+                        answer: 'a'
+                    },
+                    {
+                        text: 'Um cilindro tem raio da base igual a 7 cm e altura de 10 cm. Seu volume é: (Use $\\Pi = 3,14$)',
+                        options: ['1539 cm³', '1540 cm³', '500 cm³', '1000 cm³', '1200 cm³'],
+                        answer: 'a'
+                    },
+                    {
+                        text: 'O volume de um cubo de aresta 12 cm é:',
+                        options: ['144 cm³', '1728 cm³', '212 cm³', '288 cm³', '512 cm³'],
+                        answer: 'b'
+                    },
+                    {
+                        text: 'Um paralelepipedo tem base $4~cm\\times6$ cm e altura 9 cm. O volume é:',
+                        options: ['216 cm³', '144 cm³', '80 cm³', '200 cm³', '210 cm³'],
+                        answer: 'a'
+                    },
+                    {
+                        text: 'Calcule o volume de um cone com raio da base de 5 cm e altura de 15 cm. (Use $\\Pi = 3,14$)',
+                        options: ['392,5 cm³', '392.5 cm³', '1177,5 cm³', '1177.5 cm³', 'Nenhuma das anteriores'],
+                        answer: 'a'
+                    },
+                    {
+                        text: 'O volume de uma pirâmide de base quadrada com lado de 5 m e altura de 10 m é:',
+                        options: ['100 m³', '125 m³', '150 m³', '15,625 m³', 'Nenhuma das anteriores'],
+                        answer: 'a'
+                    },
+                    {
+                        text: 'Um reservatório em forma de cubo tem aresta de 30 dm. Qual o seu volume em dm³?',
+                        options: ['27000 dm³', '30 dm³', '900 dm³', '600 dm³', 'Nenhuma das anteriores'],
+                        answer: 'b'
+                    },
+                    {
+                        text: 'Calcule o volume de uma esfera de raio 4 cm. (Use $\\Pi = 3,14$)',
+                        options: ['267,95 cm³', '268,08 cm³', '339,12 cm³', '339.12 cm³', 'Nenhuma das anteriores'],
+                        answer: 'a'
+                    },
+                    {
+                        text: 'A área total de um cubo é 384 $cm^2$. Qual a medida da aresta?',
+                        options: ['6 cm', '7 cm', '8 cm', '9 cm', '10 cm'],
+                        answer: 'c'
+                    }
+                ]
+            },
+            'dia10': {
+                title: 'Tipologia e Gêneros Textuais',
+                questions: [
+                    {
+                        text: 'O texto abaixo é predominantemente: "Era uma noite fria de inverno. João caminhava sozinho pela rua deserta quando, de repente, ouviu passos atrás de si. Virou-se rapidamente, mas não viu ninguém. O coração acelerou. Decidiu apressar o passo, sem saber que estava prestes a viver a maior aventura de sua vida."',
+                        options: ['Descritivo', 'Argumentativo', 'Injuntivo', 'Narrativo', 'Expositivo'],
+                        answer: 'd'
+                    },
+                    {
+                        text: 'O texto abaixo é predominantemente: "A casa era pequena, mas aconchegante. As paredes eram pintadas de azul-claro, e na sala havia uma estante repleta de livros. As janelas, sempre abertas, deixavam entrar o perfume das flores do jardim."',
+                        options: ['Argumentativo', 'Narrativo', 'Descritivo', 'Injuntivo', 'Expositivo'],
+                        answer: 'c'
+                    },
+                    {
+                        text: 'O texto abaixo é predominantemente: "Para preparar o bolo, siga estas instruções: quebre três ovos em uma tigela, adicione duas xícaras de açúcar e bata bem. Em seguida, misture a farinha e o leite até obter uma massa homogênea. Leve ao forno preaquecido por 40 minutos."',
+                        options: ['Descritivo', 'Injuntivo', 'Narrativo', 'Argumentativo', 'Expositivo'],
+                        answer: 'b'
+                    }
+                ]
+            },
+            'dia11': {
+                title: 'Estatística',
+                questions: [
+                    {
+                        text: 'Em uma pesquisa sobre o número de livros lidos por 10 estudantes no mês, obteve-se: 2, 3, 1, 4, 3, 2, 5, 3, 2, 1. Qual é a média aritmética de livros lidos?',
+                        options: ['2,5', '2,8', '3,0', '3,2', '4,0'],
+                        answer: 'b'
+                    },
+                    {
+                        text: 'Com os mesmos dados da questão anterior, qual é a moda?',
+                        options: ['1', '2', '3', '4', '5'],
+                        answer: 'c'
+                    },
+                    {
+                        text: 'E a mediana da mesma amostra é:',
+                        options: ['2', '2,5', '3', '3,5', '4'],
+                        answer: 'b'
+                    },
+                    {
+                        text: 'Um gráfico mostra o número de carros vendidos em uma concessionária durante 5 meses: Janeiro: 20, Fevereiro: 15, Março: 25, Abril: 30, Maio: 10. Qual foi o total de carros vendidos no período?',
+                        options: ['100', '110', '95', '120', '105'],
+                        answer: 'b'
+                    },
+                    {
+                        text: 'Com os mesmos dados, qual foi a média mensal de carros vendidos?',
+                        options: ['20', '21', '22', '23', '24'],
+                        answer: 'c'
+                    },
+                    {
+                        text: 'Em uma tabela de distribuição de frequência, as idades de um grupo de pessoas são 10, 12, 14, 15, 12, 14, 14, 11, 13, 14. Qual é a moda das idades?',
+                        options: ['12', '13', '14', '15', 'Nenhuma das anteriores'],
+                        answer: 'c'
+                    },
+                    {
+                        text: 'A média das notas de 5 alunos em uma prova foi 7,5. Se um novo aluno tirou 8,5, qual a nova média da turma?',
+                        options: ['7,5', '7,6', '8,0', '8,5', 'Nenhuma das anteriores'],
+                        answer: 'a'
+                    },
+                    {
+                        text: 'A mediana de um conjunto de dados ordenado é a média dos dois valores centrais. Qual a mediana dos dados 60, 65, 70, 75, 80, 85?',
+                        options: ['70', '72,5', '75', '80', 'Nenhuma das anteriores'],
+                        answer: 'c'
+                    },
+                    {
+                        text: 'Em uma série de dados, a moda é o valor que mais se repete. Qual a moda do conjunto: 1, 2, 2, 3, 4, 5, 5, 5, 6, 7?',
+                        options: ['2', '5', '3', '6', '7'],
+                        answer: 'b'
+                    },
+                    {
+                        text: 'Um vendedor registrou o número de vendas por dia durante uma semana: 2, 3, 4, 1, 3, 2, 4. Qual é a média de vendas por dia?',
+                        options: ['2,5', '2,8', '3,0', '3,2', '3,5'],
+                        answer: 'a'
+                    }
+                ]
+            }
+        };
+
+        const navContainer = document.getElementById('nav-container');
+        const subjectInfo = document.getElementById('subject-info');
+        const subjectTitle = document.getElementById('subject-title');
+        const subjectCount = document.getElementById('subject-count');
+        const questionsContainer = document.getElementById('questions-container');
+        const feedbackMessage = document.getElementById('feedback-message');
+
+        let currentDay = 'dia1';
+
+        function showFeedback(message, type) {
+            feedbackMessage.textContent = message;
+            if (type === 'correct') {
+                feedbackMessage.className = 'fixed bottom-0 left-0 w-full p-4 text-center text-white text-xl font-bold bg-green-500 transform transition-transform duration-300 translate-y-0';
+            } else if (type === 'incorrect') {
+                feedbackMessage.className = 'fixed bottom-0 left-0 w-full p-4 text-center text-white text-xl font-bold bg-red-500 transform transition-transform duration-300 translate-y-0';
+            }
+            setTimeout(() => {
+                feedbackMessage.className = 'fixed bottom-0 left-0 w-full p-4 text-center text-white text-xl font-bold transform transition-transform duration-300 -translate-y-full';
+            }, 1500);
+        }
+
+        function renderNav() {
+            navContainer.innerHTML = '';
+            Object.keys(simulados).forEach(dayKey => {
+                const button = document.createElement('button');
+                button.textContent = simulados[dayKey].title;
+                button.className = `nav-button px-4 py-2 rounded-full font-medium ${currentDay === dayKey ? 'bg-white text-indigo-600' : 'bg-indigo-500 text-white'}`;
+                button.onclick = () => {
+                    currentDay = dayKey;
+                    renderQuestions();
+                    renderNav();
+                };
+                navContainer.appendChild(button);
+            });
+        }
+        
+        function renderQuestions() {
+            questionsContainer.innerHTML = '';
+            const data = simulados[currentDay];
+            
+            subjectInfo.classList.remove('hidden');
+            subjectTitle.textContent = data.title;
+            subjectCount.textContent = `${data.questions.length} Questões`;
+            
+            data.questions.forEach((q, qIndex) => {
+                const questionCard = document.createElement('div');
+                questionCard.className = 'bg-white p-6 rounded-lg card';
+                
+                const questionText = document.createElement('p');
+                questionText.className = 'text-lg font-semibold mb-4';
+                questionText.innerHTML = `Questão ${qIndex + 1}: ${q.text}`;
+                questionCard.appendChild(questionText);
+                
+                const optionsList = document.createElement('div');
+                optionsList.className = 'space-y-2';
+                
+                q.options.forEach((optText, optIndex) => {
+                    const optionItem = document.createElement('div');
+                    const optionLetter = String.fromCharCode(97 + optIndex);
+                    optionItem.className = 'option-item p-3 border border-gray-200 rounded-lg transition-all duration-200';
+                    optionItem.innerHTML = `<span class="font-bold uppercase">${optionLetter})</span> ${optText}`;
+                    optionItem.onclick = () => {
+                        handleAnswer(optionLetter, q.answer, optionItem);
+                    };
+                    optionsList.appendChild(optionItem);
+                });
+                
+                questionCard.appendChild(optionsList);
+                questionsContainer.appendChild(questionCard);
+            });
+        }
+        
+        function handleAnswer(selected, correct, element) {
+            // Remove previous styling from all options
+            const options = element.parentElement.children;
+            for (let i = 0; i < options.length; i++) {
+                options[i].classList.remove('correct', 'incorrect', 'pointer-events-none');
+            }
+            
+            if (selected === correct) {
+                element.classList.add('correct');
+                showFeedback('Resposta Correta!', 'correct');
+            } else {
+                element.classList.add('incorrect');
+                showFeedback('Resposta Incorreta!', 'incorrect');
+                // Find and highlight the correct answer
+                const correctOption = Array.from(options).find(opt => opt.textContent.toLowerCase().startsWith(correct + ')'));
+                if (correctOption) {
+                    correctOption.classList.add('correct');
+                }
+            }
+            
+            // Disable all options for the current question
+            for (let i = 0; i < options.length; i++) {
+                options[i].classList.add('pointer-events-none');
+            }
+        }
+        
+        // Initial render
+        document.addEventListener('DOMContentLoaded', () => {
+            renderNav();
+            renderQuestions();
+        });
+    </script>
+</body>
+</html>
